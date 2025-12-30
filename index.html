@@ -30,7 +30,7 @@ button {
   cursor: pointer;
 }
 
-#spins, #result {
+#coins, #spins, #result {
   font-size: 20px;
   margin-top: 10px;
 }
@@ -49,8 +49,11 @@ button {
 
 <canvas id="wheel" width="300" height="300"></canvas>
 
-<p>Spins Left: <span id="spins">3</span></p>
+<p>Coins: <span id="coins">100</span></p>
+<p>Spins Left: <span id="spins">5</span></p>
+
 <button onclick="spinWheel()">SPIN</button>
+
 <p id="result"></p>
 
 <audio id="spinSound" src="https://www.soundjay.com/button/beep-07.mp3"></audio>
@@ -62,78 +65,105 @@ const radius = 150;
 let angle = 0;
 let spinning = false;
 
-const options = ["10 Coins", "20 Coins", "Try Again", "50 Coins", "Jackpot"];
+let coins = 100;
+let spinsLeft = 5;
+
+const options = [
+  {text:"10 Coins", value:10, chance:30},
+  {text:"20 Coins", value:20, chance:25},
+  {text:"Try Again", value:0, chance:30},
+  {text:"50 Coins", value:50, chance:10},
+  {text:"Jackpot 100 Coins", value:100, chance:5}
+];
 const colors = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231"];
-let spinsLeft = 3;
 
 function drawWheel() {
-    const slice = 2 * Math.PI / options.length;
-    for (let i = 0; i < options.length; i++) {
+    const total = options.reduce((sum,o)=>sum+o.chance,0);
+    let start = 0;
+    options.forEach((opt,i)=>{
+        let slice = (opt.chance/total) * 2 * Math.PI;
         ctx.beginPath();
         ctx.fillStyle = colors[i];
         ctx.moveTo(radius,radius);
-        ctx.arc(radius,radius,radius,slice*i + angle,slice*(i+1) + angle);
+        ctx.arc(radius,radius,radius,start,start+slice);
         ctx.fill();
 
         ctx.save();
         ctx.translate(radius,radius);
-        ctx.rotate(slice*i + slice/2 + angle);
+        ctx.rotate(start+slice/2 + angle);
         ctx.fillStyle="white";
         ctx.font="16px Arial";
-        ctx.fillText(options[i], 60, 5);
+        ctx.fillText(opt.text, 60, 5);
         ctx.restore();
-    }
+
+        start += slice;
+    });
 }
 drawWheel();
 
 function spinWheel() {
-    if (spinsLeft <= 0) {
+    if(spinsLeft <= 0){
         alert("No spins left!");
         return;
     }
-    if (spinning) return;
+    if(coins < 10){
+        alert("Not enough coins!");
+        return;
+    }
+    if(spinning) return;
 
+    coins -= 10;
     spinsLeft--;
+    document.getElementById("coins").innerText = coins;
     document.getElementById("spins").innerText = spinsLeft;
 
     const spinSound = document.getElementById("spinSound");
     spinSound.play();
 
+    // spin animation
     let target = Math.random() * 2 * Math.PI;
-    let totalSpins = 6; // number of rotations
+    let totalSpins = 6;
     let start = angle;
-    let end = angle + totalSpins * 2 * Math.PI + target;
-    let duration = 3000; // 3 seconds
-
+    let end = angle + totalSpins*2*Math.PI + target;
+    let duration = 3000;
     spinning = true;
     let startTime = null;
 
-    function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
+    function animate(timestamp){
+        if(!startTime) startTime = timestamp;
         let progress = timestamp - startTime;
-        let currentAngle = start + (end - start) * easeOutCubic(progress/duration);
+        let currentAngle = start + (end-start) * easeOutCubic(progress/duration);
         angle = currentAngle;
         ctx.clearRect(0,0,canvas.width,canvas.height);
         drawWheel();
 
-        if (progress < duration) {
+        if(progress < duration){
             requestAnimationFrame(animate);
         } else {
             spinning = false;
-            let resultIndex = Math.floor(((2*Math.PI - (angle % (2*Math.PI))) / (2*Math.PI)) * options.length) % options.length;
-            document.getElementById("result").innerText = "Result: " + options[resultIndex];
+            // calculate reward
+            let rand = Math.random()*100;
+            let sum = 0;
+            let reward = options[options.length-1]; // default
+            for(let opt of options){
+                sum += opt.chance;
+                if(rand <= sum){
+                    reward = opt;
+                    break;
+                }
+            }
+            coins += reward.value;
+            document.getElementById("coins").innerText = coins;
+            document.getElementById("result").innerText = "Result: " + reward.text;
         }
     }
     requestAnimationFrame(animate);
 }
 
-// easing function for smooth stop
-function easeOutCubic(t) {
+function easeOutCubic(t){
     return (--t)*t*t + 1;
 }
 </script>
 
 </body>
-</html>
-
-  
+  </html>
