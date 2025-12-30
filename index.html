@@ -30,7 +30,7 @@ button {
   cursor: pointer;
 }
 
-#coins, #spins, #result {
+#spins, #result {
   font-size: 20px;
   margin-top: 10px;
 }
@@ -49,40 +49,91 @@ button {
 
 <canvas id="wheel" width="300" height="300"></canvas>
 
-<!-- Spins left display -->
 <p>Spins Left: <span id="spins">3</span></p>
-
-<!-- Spin button -->
 <button onclick="spinWheel()">SPIN</button>
-
-<!-- Result display -->
 <p id="result"></p>
 
+<audio id="spinSound" src="https://www.soundjay.com/button/beep-07.mp3"></audio>
+
 <script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const radius = 150;
+let angle = 0;
+let spinning = false;
+
+const options = ["10 Coins", "20 Coins", "Try Again", "50 Coins", "Jackpot"];
+const colors = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231"];
 let spinsLeft = 3;
 
+function drawWheel() {
+    const slice = 2 * Math.PI / options.length;
+    for (let i = 0; i < options.length; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = colors[i];
+        ctx.moveTo(radius,radius);
+        ctx.arc(radius,radius,radius,slice*i + angle,slice*(i+1) + angle);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(radius,radius);
+        ctx.rotate(slice*i + slice/2 + angle);
+        ctx.fillStyle="white";
+        ctx.font="16px Arial";
+        ctx.fillText(options[i], 60, 5);
+        ctx.restore();
+    }
+}
+drawWheel();
+
 function spinWheel() {
-  if (spinsLeft <= 0) {
-    alert("No spins left!");
-    return;
-  }
+    if (spinsLeft <= 0) {
+        alert("No spins left!");
+        return;
+    }
+    if (spinning) return;
 
-  spinsLeft--;
-  document.getElementById("spins").innerText = spinsLeft;
+    spinsLeft--;
+    document.getElementById("spins").innerText = spinsLeft;
 
-  const rewards = ["10 Coins", "20 Coins", "Try Again", "50 Coins"];
-  const result = rewards[Math.floor(Math.random() * rewards.length)];
-  document.getElementById("result").innerText = result;
+    const spinSound = document.getElementById("spinSound");
+    spinSound.play();
 
-  // Optional: simple canvas color change on spin
-  const canvas = document.getElementById("wheel");
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#"+Math.floor(Math.random()*16777215).toString(16);
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+    let target = Math.random() * 2 * Math.PI;
+    let totalSpins = 6; // number of rotations
+    let start = angle;
+    let end = angle + totalSpins * 2 * Math.PI + target;
+    let duration = 3000; // 3 seconds
+
+    spinning = true;
+    let startTime = null;
+
+    function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        let progress = timestamp - startTime;
+        let currentAngle = start + (end - start) * easeOutCubic(progress/duration);
+        angle = currentAngle;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        drawWheel();
+
+        if (progress < duration) {
+            requestAnimationFrame(animate);
+        } else {
+            spinning = false;
+            let resultIndex = Math.floor(((2*Math.PI - (angle % (2*Math.PI))) / (2*Math.PI)) * options.length) % options.length;
+            document.getElementById("result").innerText = "Result: " + options[resultIndex];
+        }
+    }
+    requestAnimationFrame(animate);
+}
+
+// easing function for smooth stop
+function easeOutCubic(t) {
+    return (--t)*t*t + 1;
 }
 </script>
 
 </body>
-  </html>
+</html>
 
   
