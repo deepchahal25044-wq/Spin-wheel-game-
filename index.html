@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spin Wheel Game</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+    canvas {
+      margin-top: 30px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 18px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎡 Spin & Win</h1>
+  <canvas id="wheel" width="300" height="300"></canvas><br>
+  <button onclick="spin()">SPIN</button>
+
+  <script>
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+
+    const items = ["₹10", "₹20", "₹50", "₹0", "₹100", "Try Again"];
+    const colors = ["red","blue","green","orange","purple","gray"];
+    let angle = 0;
+
+    function drawWheel() {
+      const slice = 2 * Math.PI / items.length;
+      for (let i = 0; i < items.length; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = colors[i];
+        ctx.moveTo(150,150);
+        ctx.arc(150,150,150, slice*i + angle, slice*(i+1) + angle);
+        ctx.fill();
+        ctx.save();
+        ctx.translate(150,150);
+        ctx.rotate(slice*i + slice/2 + angle);
+        ctx.fillStyle = "white";
+        ctx.fillText(items[i], 60, 10);
+        ctx.restore();
+      }
+    }
+
+    function spin() {
+      const spinAngle = Math.random() * 5000;
+      angle += spinAngle * Math.PI / 180;
+      ctx.clearRect(0,0,300,300);
+      drawWheel();
+      setTimeout(() => {
+        alert("Result: " + items[Math.floor(Math.random()*items.length)]);
+      }, 500);
+    }
+
+    drawWheel();
+  </script>
+
+</body>
+  </html>
