@@ -1,72 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Deepu Spin & Win</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: Arial, sans-serif;
-      background: black;
-      color: #fff;
-    }
-    canvas {
-      margin-top: 30px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px 25px;
-      font-size: 18px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepu Spin & Win</title>
+<style>
+body {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  margin-top: 20px;
+  border-radius: 15px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 14px 30px;
+  font-size: 18px;
+  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+#coins, #spins, #result {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  button {
+    width: 90%;
+    font-size: 20px;
+  }
+}
+</style>
 </head>
 <body>
 
-  <h1>🎡 Spin & Win</h1>
-  <canvas id="wheel" width="300" height="300"></canvas><br>
-  <button onclick="spin()">Spin & Win ₹</button>
+<h1>🎡 Deepu Spin & Win</h1>
 
-  <script>
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
+<canvas id="wheel" width="300" height="300"></canvas>
 
-    const items = ["5₹", "10₹", "Better Luck", "100₹"];
-    const colors = ["red","blue","green","orange","purple","gray"];
-    let angle = 0;
+<!-- Spins left display -->
+<p>Spins Left: <span id="spins">3</span></p>
 
-    function drawWheel() {
-      const slice = 2 * Math.PI / items.length;
-      for (let i = 0; i < items.length; i++) {
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(150,150);
-        ctx.arc(150,150,150, slice*i + angle, slice*(i+1) + angle);
-        ctx.fill();
-        ctx.save();
-        ctx.translate(150,150);
-        ctx.rotate(slice*i + slice/2 + angle);
-        ctx.fillStyle = "white";
-        ctx.fillText(items[i], 60, 10);
-        ctx.restore();
-      }
-    }
+<!-- Spin button -->
+<button onclick="spinWheel()">SPIN</button>
 
-    function spin() {
-      const spinAngle = Math.random() * 5000;
-      angle += spinAngle * Math.PI / 180;
-      ctx.clearRect(0,0,300,300);
-      drawWheel();
-      setTimeout(() => {
-        alert("Result: " + items[Math.floor(Math.random()*items.length)]);
-      }, 500);
-    }
+<!-- Result display -->
+<p id="result"></p>
 
-    drawWheel();
-  </script>
+<script>
+let spinsLeft = 3;
+
+function spinWheel() {
+  if (spinsLeft <= 0) {
+    alert("No spins left!");
+    return;
+  }
+
+  spinsLeft--;
+  document.getElementById("spins").innerText = spinsLeft;
+
+  const rewards = ["10 Coins", "20 Coins", "Try Again", "50 Coins"];
+  const result = rewards[Math.floor(Math.random() * rewards.length)];
+  document.getElementById("result").innerText = result;
+
+  // Optional: simple canvas color change on spin
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#"+Math.floor(Math.random()*16777215).toString(16);
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+</script>
 
 </body>
   </html>
+
+  
