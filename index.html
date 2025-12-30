@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Spin Wheel Game</title>
+  <title>Deepu Spin & Win</title>
   <style>
     body {
       text-align: center;
       font-family: Arial, sans-serif;
-      background: #111;
+      background: black;
       color: #fff;
     }
     canvas {
@@ -28,13 +28,13 @@
 
   <h1>🎡 Spin & Win</h1>
   <canvas id="wheel" width="300" height="300"></canvas><br>
-  <button onclick="spin()">SPIN</button>
+  <button onclick="spin()">Spin & Win ₹</button>
 
   <script>
     const canvas = document.getElementById("wheel");
     const ctx = canvas.getContext("2d");
 
-    const items = ["₹10", "₹20", "₹50", "₹0", "₹100", "Try Again"];
+    const items = ["5₹", "10₹", "Better Luck", "100₹"];
     const colors = ["red","blue","green","orange","purple","gray"];
     let angle = 0;
 
